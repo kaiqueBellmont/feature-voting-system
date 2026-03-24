@@ -1,0 +1,2 @@
+2026-03-24T00:00:00Z | Created CLAUDE.md with prompt logging rule; created prompts.txt log file.
+2026-03-24T00:01:00Z | Created User model in features/models.py (AbstractUser + created_at); registered 'features' in INSTALLED_APPS and set AUTH_USER_MODEL in settings.py.
