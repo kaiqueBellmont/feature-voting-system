@@ -1,4 +1,9 @@
 services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
   backend:
     build: ./backend
     ports:
@@ -7,11 +12,8 @@ services:
       - ./backend:/app
     environment:
       - DJANGO_SETTINGS_MODULE=core.settings
-
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
+    depends_on:
+      - redis
 
   frontend:
     build: ./frontend

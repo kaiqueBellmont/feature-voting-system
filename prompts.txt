@@ -28,3 +28,5 @@
 2026-03-25T00:16:00Z | Added rank field to FeatureSerializer and Window(Rank()) annotation in get_queryset; showed rank badge (gold/silver/bronze for top 3) in list cards and detail page — 32/32 passing.
 2026-03-25T00:17:00Z | Added delete button to FeatureDetailPage (visible to feature author only): inline confirmation dialog with Confirm/Cancel; on confirm calls DELETE /features/:id/ and navigates to /.
 2026-03-25T00:18:00Z | Created admin registrations in features/admin.py: CustomUserAdmin (UserAdmin), FeatureAdmin (vote_count_display, list_editable status, mark_planned/mark_rejected actions), VoteAdmin.
+2026-03-25T00:19:00Z | Created Notification model in notifications/models.py (Type choices, recipient/feature FKs, is_read index, composite index on recipient+is_read); created NotificationSerializer with type_display and feature_title read-only fields; ran migrations — applied successfully.
+2026-03-25T00:20:00Z | Updated entrypoint.sh to start with daphne instead of runserver; updated core/asgi.py to use ProtocolTypeRouter with http + websocket (AllowedHostsOriginValidator + empty URLRouter placeholder).

@@ -40,8 +40,22 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'features',
-
+    'channels',
+    'notifications'
 ]
+
+# sockets
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('redis', 6379)],
+        },
+    },
+}
+
+ASGI_APPLICATION = 'core.asgi.application'
+
 
 AUTH_USER_MODEL = 'features.User'
 
