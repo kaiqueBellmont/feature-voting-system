@@ -6,3 +6,4 @@
 2026-03-24T00:05:00Z | Added FeatureSerializer and VoteSerializer to serializers.py; updated imports to include Feature and Vote.
 2026-03-24T00:06:00Z | Created features/views.py (FeatureViewSet + AuthViewSet), features/urls.py (DefaultRouter), updated core/urls.py to include features.urls under api/.
 2026-03-24T00:07:00Z | Created backend/docs/urls.md with full API documentation: route table, request/response examples, model reference, and 10 business rules.
+2026-03-24T00:08:00Z | Updated backend/docs/urls.md to reflect JWT auth migration: replaced session auth with simplejwt, added /api/token/ and /api/token/refresh/ endpoints, updated register response, stateless logout, and 2 new business rules (11, 12).
