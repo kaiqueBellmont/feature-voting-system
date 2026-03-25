@@ -19,3 +19,6 @@
 2026-03-25T00:07:00Z | Reminded to log prompts; appended missing last entry to prompts.txt.
 2026-03-25T00:08:00Z | Added FeaturePagination (page_size=10, max=100) to views.py; updated featuresSlice with count/next/appendFeatures; added Load more button to FeaturesPage; fixed tests for paginated response shape — 32/32 passing.
 2026-03-25T00:09:00Z | Replaced Load more with classic pagination: prev/next arrows, numbered buttons, ellipsis for large page counts, active page highlighted, scrolls to top on page change.
+2026-03-25T00:10:00Z | Added SearchFilter and OrderingFilter to FeatureViewSet: search on title/description, ordering on vote_count/created_at — 32/32 passing.
+2026-03-25T00:11:00Z | Added debounced search input (400ms, useRef) to FeaturesPage with search icon, clear button, resets to page 1 on new query.
+2026-03-25T00:12:00Z | Added ordering dropdown to FeaturesPage (Most voted, Least voted, Newest, Oldest); composable with search and pagination.

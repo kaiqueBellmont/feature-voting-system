@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate, Link } from 'react-router-dom'
 import api from '../api/axios'
@@ -27,18 +27,38 @@ const FeaturesPage = () => {
   const [form, setForm] = useState(EMPTY_FORM)
   const [formError, setFormError] = useState(null)
   const [submitting, setSubmitting] = useState(false)
+  const [search, setSearch] = useState('')
+  const [ordering, setOrdering] = useState('-vote_count')
 
+  const debounceRef = useRef(null)
   const totalPages = Math.ceil(count / PAGE_SIZE)
 
-  const fetchPage = (page) => {
+  const fetchPage = (page, searchQuery = search, orderingValue = ordering) => {
     dispatch(setCurrentPage(page))
-    api.get(`features/?page=${page}`).then(({ data }) => dispatch(setFeatures(data)))
+    const params = new URLSearchParams({ page, ordering: orderingValue })
+    if (searchQuery) params.set('search', searchQuery)
+    api.get(`features/?${params}`).then(({ data }) => dispatch(setFeatures(data)))
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   useEffect(() => {
     fetchPage(1)
   }, [])
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value
+    setSearch(value)
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => {
+      fetchPage(1, value)
+    }, 400)
+  }
+
+  const handleOrderingChange = (e) => {
+    const value = e.target.value
+    setOrdering(value)
+    fetchPage(1, search, value)
+  }
 
   const handleLogout = async () => {
     await api.post('auth/logout/').catch(() => {})
@@ -150,9 +170,50 @@ const FeaturesPage = () => {
             </button>
           )}
         </div>
-        <p className="text-sm text-gray-500 mb-8">
-          {count} {count === 1 ? 'request' : 'requests'} · sorted by votes
+        <p className="text-sm text-gray-500 mb-6">
+          {count} {count === 1 ? 'request' : 'requests'}
         </p>
+
+        {/* Search + Ordering */}
+        <div className="flex gap-2 mb-6">
+          <div className="relative flex-1">
+            <svg
+              viewBox="0 0 24 24"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
+              fill="none" stroke="currentColor" strokeWidth={2}
+              strokeLinecap="round" strokeLinejoin="round"
+            >
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              type="text"
+              value={search}
+              onChange={handleSearchChange}
+              placeholder="Search by title or description…"
+              className="w-full pl-9 pr-8 py-2.5 text-sm border border-gray-200 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition"
+            />
+            {search && (
+              <button
+                onClick={() => { setSearch(''); fetchPage(1, '') }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+
+          <select
+            value={ordering}
+            onChange={handleOrderingChange}
+            className="text-sm border border-gray-200 rounded-xl bg-white shadow-sm px-3 py-2.5 text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition cursor-pointer"
+          >
+            <option value="-vote_count">Most voted</option>
+            <option value="vote_count">Least voted</option>
+            <option value="-created_at">Newest</option>
+            <option value="created_at">Oldest</option>
+          </select>
+        </div>
 
         {/* Feature list */}
         {features.length === 0 ? (
