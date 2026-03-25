@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate, Link } from 'react-router-dom'
+import { Link as RouterLink } from 'react-router-dom'
 import api from '../api/axios'
 import { setFeatures, setCurrentPage, updateFeature, addFeature, PAGE_SIZE } from '../store/slices/featuresSlice'
 import { logout } from '../store/slices/authSlice'
@@ -227,7 +228,22 @@ const FeaturesPage = () => {
               return (
                 <li key={feature.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
                   <div className="flex items-start justify-between gap-2 flex-wrap">
-                    <h2 className="text-base font-semibold text-gray-900 leading-snug">{feature.title}</h2>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className={`shrink-0 text-xs font-bold w-6 h-6 flex items-center justify-center rounded-full ${
+                        feature.rank === 1 ? 'bg-yellow-400 text-white' :
+                        feature.rank === 2 ? 'bg-gray-300 text-gray-700' :
+                        feature.rank === 3 ? 'bg-amber-600 text-white' :
+                        'bg-gray-100 text-gray-400'
+                      }`}>
+                        {feature.rank}
+                      </span>
+                      <RouterLink
+                        to={`/features/${feature.id}`}
+                        className="text-base font-semibold text-gray-900 hover:text-indigo-600 transition-colors leading-snug"
+                      >
+                        {feature.title}
+                      </RouterLink>
+                    </div>
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full capitalize ${STATUS_COLORS[feature.status] ?? 'bg-gray-100 text-gray-500'}`}>
                       {feature.status.replace('_', ' ')}
                     </span>
@@ -238,6 +254,7 @@ const FeaturesPage = () => {
                     <p className="text-xs text-gray-400">
                       by <span className="font-medium text-gray-500">{feature.author.username}</span>
                     </p>
+                    <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => canVote && handleVote(feature)}
                       disabled={!canVote}
@@ -272,6 +289,18 @@ const FeaturesPage = () => {
                       </svg>
                       {feature.vote_count}
                     </button>
+
+                    <RouterLink
+                      to={`/features/${feature.id}`}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 text-xs font-medium text-gray-400 hover:border-indigo-300 hover:text-indigo-500 hover:bg-indigo-50 transition-all duration-200"
+                      title="View details"
+                    >
+                      <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    </RouterLink>
+                    </div>
                   </div>
                 </li>
               )
