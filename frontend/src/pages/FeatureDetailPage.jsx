@@ -20,6 +20,7 @@ const FeatureDetailPage = () => {
   const [feature, setFeature] = useState(null)
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
+  const [voteError, setVoteError] = useState(null)
 
   useEffect(() => {
     setLoading(true)
@@ -41,8 +42,14 @@ const FeatureDetailPage = () => {
         await api.post(`features/${feature.id}/vote/`)
         setFeature({ ...feature, vote_count: feature.vote_count + 1, user_has_voted: true })
       }
-    } catch {
-      // vote failed — no state change
+    } catch (err) {
+      if (err.response?.status === 429) {
+        const retryAfter = err.response.headers['retry-after']
+        const seconds = retryAfter ? parseInt(retryAfter, 10) : 3600
+        const wait = seconds < 60 ? `${seconds}s` : seconds < 3600 ? `${Math.ceil(seconds / 60)} minutes` : `${Math.ceil(seconds / 3600)} hours`
+        setVoteError(`Vote limit reached. Try again in ${wait}.`)
+        setTimeout(() => setVoteError(null), 5000)
+      }
     }
   }
 
@@ -65,6 +72,18 @@ const FeatureDetailPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
+
+      {voteError && (
+        <div className="fixed top-16 inset-x-0 z-40 flex justify-center px-4 pointer-events-none">
+          <div className="flex items-center gap-3 bg-red-50 border border-red-200 text-red-700 text-sm font-medium px-4 py-2.5 rounded-xl shadow-md pointer-events-auto">
+            <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0 fill-red-400" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+            {voteError}
+            <button onClick={() => setVoteError(null)} className="ml-1 text-red-400 hover:text-red-600 transition-colors">✕</button>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-2xl mx-auto px-4 py-10">
 
