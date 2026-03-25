@@ -12,7 +12,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         token = self.scope['query_string'].decode()
         token = dict(
-            param.split('=') for param in token.split('&') if '=' in param
+            param.split('=', 1) for param in token.split('&') if '=' in param
         ).get('token')
 
         user = await self._get_user(token)

@@ -1,10 +1,17 @@
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from .models import Notification
 from .serializers import NotificationSerializer
+
+
+class NotificationPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 
 class NotificationViewSet(
@@ -14,6 +21,7 @@ class NotificationViewSet(
 ):
     serializer_class = NotificationSerializer
     permission_classes = [IsAuthenticated]
+    pagination_class = NotificationPagination
     http_method_names = ['get', 'patch', 'post', 'head', 'options']
 
     def get_queryset(self):
@@ -39,8 +47,6 @@ class NotificationViewSet(
 
     def partial_update(self, request, *args, **kwargs):
         notification = self.get_object()
-        if notification.recipient != request.user:
-            return Response(status=403)
         serializer = self.get_serializer(
             notification,
             data={'is_read': request.data.get('is_read')},
