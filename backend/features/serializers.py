@@ -23,13 +23,14 @@ class RegisterSerializer(serializers.ModelSerializer):
 class FeatureSerializer(serializers.ModelSerializer):
     author = UserSerializer(read_only=True)
     vote_count = serializers.IntegerField(read_only=True)
+    rank = serializers.IntegerField(read_only=True)
     user_has_voted = serializers.SerializerMethodField()
 
     class Meta:
         model = Feature
         fields = [
             'id', 'title', 'description', 'author',
-            'status', 'vote_count', 'user_has_voted',
+            'status', 'vote_count', 'rank', 'user_has_voted',
             'created_at', 'updated_at'
         ]
 

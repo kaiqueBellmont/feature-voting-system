@@ -1,4 +1,5 @@
-from django.db.models import Count
+from django.db.models import Count, F, Window
+from django.db.models.functions import Rank
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -31,6 +32,10 @@ class FeatureViewSet(viewsets.ModelViewSet):
             .select_related('author')
             .prefetch_related('votes')
             .annotate(vote_count=Count('votes'))
+            .annotate(rank=Window(
+                expression=Rank(),
+                order_by=F('vote_count').desc()
+            ))
             .order_by('-vote_count')
         )
 
