@@ -10,13 +10,19 @@ def detail_url(pk):
     return f'/api/features/{pk}/'
 
 
+def results(response):
+    """Unwrap paginated response data."""
+    return response.data['results']
+
+
 @pytest.mark.django_db
 class TestListFeatures:
     def test_list_returns_200_unauthenticated(self, api_client, feature1, feature2):
         response = api_client.get(LIST_URL)
 
         assert response.status_code == 200
-        assert len(response.data) == 2
+        assert response.data['count'] == 2
+        assert len(results(response)) == 2
 
     def test_list_ordered_by_vote_count_descending(self, api_client, user1, user2, feature1, feature2):
         # feature2 gets 1 vote, feature1 gets 0 — feature2 should come first
@@ -24,16 +30,15 @@ class TestListFeatures:
 
         response = api_client.get(LIST_URL)
 
-        assert response.status_code == 200
-        assert response.data[0]['id'] == feature2.id
-        assert response.data[1]['id'] == feature1.id
+        assert results(response)[0]['id'] == feature2.id
+        assert results(response)[1]['id'] == feature1.id
 
     def test_list_includes_vote_count(self, api_client, user1, user2, feature1, feature2):
         Vote.objects.create(feature=feature1, user=user2)
 
         response = api_client.get(LIST_URL)
 
-        feature1_data = next(f for f in response.data if f['id'] == feature1.id)
+        feature1_data = next(f for f in results(response) if f['id'] == feature1.id)
         assert feature1_data['vote_count'] == 1
 
     def test_user_has_voted_true(self, auth_client2, user2, feature1):
@@ -41,20 +46,35 @@ class TestListFeatures:
 
         response = auth_client2.get(LIST_URL)
 
-        feature1_data = next(f for f in response.data if f['id'] == feature1.id)
+        feature1_data = next(f for f in results(response) if f['id'] == feature1.id)
         assert feature1_data['user_has_voted'] is True
 
     def test_user_has_voted_false_for_unauthenticated(self, api_client, feature1):
         response = api_client.get(LIST_URL)
 
-        feature1_data = next(f for f in response.data if f['id'] == feature1.id)
+        feature1_data = next(f for f in results(response) if f['id'] == feature1.id)
         assert feature1_data['user_has_voted'] is False
 
     def test_user_has_voted_false_when_not_voted(self, auth_client1, feature2):
         response = auth_client1.get(LIST_URL)
 
-        feature2_data = next(f for f in response.data if f['id'] == feature2.id)
+        feature2_data = next(f for f in results(response) if f['id'] == feature2.id)
         assert feature2_data['user_has_voted'] is False
+
+    def test_list_pagination_structure(self, api_client, feature1, feature2):
+        response = api_client.get(LIST_URL)
+
+        assert 'count' in response.data
+        assert 'next' in response.data
+        assert 'previous' in response.data
+        assert 'results' in response.data
+
+    def test_list_page_size_param(self, api_client, feature1, feature2):
+        response = api_client.get(LIST_URL + '?page_size=1')
+
+        assert response.status_code == 200
+        assert len(results(response)) == 1
+        assert response.data['next'] is not None
 
 
 @pytest.mark.django_db

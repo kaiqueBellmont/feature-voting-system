@@ -1,6 +1,7 @@
 from django.db.models import Count
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -9,9 +10,16 @@ from .models import Feature, Vote
 from .serializers import FeatureSerializer, RegisterSerializer, UserSerializer
 
 
+class FeaturePagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
 class FeatureViewSet(viewsets.ModelViewSet):
     serializer_class = FeatureSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+    pagination_class = FeaturePagination
 
     def get_queryset(self):
         return (
