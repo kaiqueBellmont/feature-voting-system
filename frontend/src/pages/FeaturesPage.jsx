@@ -53,8 +53,7 @@ const FeaturesPage = () => {
     }, 400)
   }
 
-  const handleOrderingChange = (e) => {
-    const value = e.target.value
+  const handleOrderingChange = (value) => {
     setOrdering(value)
     fetchPage(1, search, value)
   }
@@ -141,45 +140,54 @@ const FeaturesPage = () => {
           {count} {count === 1 ? 'request' : 'requests'}
         </p>
 
-        {/* Search + Ordering */}
-        <div className="flex gap-2 mb-6">
-          <div className="relative flex-1">
-            <svg
-              viewBox="0 0 24 24"
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
-              fill="none" stroke="currentColor" strokeWidth={2}
-              strokeLinecap="round" strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              type="text"
-              value={search}
-              onChange={handleSearchChange}
-              placeholder="Search by title or description…"
-              className="w-full pl-9 pr-8 py-2.5 text-sm border border-gray-200 rounded-xl bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition"
-            />
-            {search && (
-              <button
-                onClick={() => { setSearch(''); fetchPage(1, '') }}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                ✕
-              </button>
-            )}
-          </div>
-
-          <select
-            value={ordering}
-            onChange={handleOrderingChange}
-            className="text-sm border border-gray-200 rounded-xl bg-white shadow-sm px-3 py-2.5 text-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition cursor-pointer"
+        {/* Search */}
+        <div className="relative mb-3">
+          <svg
+            viewBox="0 0 24 24"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
+            fill="none" stroke="currentColor" strokeWidth={2}
+            strokeLinecap="round" strokeLinejoin="round"
           >
-            <option value="-vote_count">Most voted</option>
-            <option value="vote_count">Least voted</option>
-            <option value="-created_at">Newest</option>
-            <option value="created_at">Oldest</option>
-          </select>
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input
+            type="text"
+            value={search}
+            onChange={handleSearchChange}
+            placeholder="Search by title or description…"
+            className="w-full pl-9 pr-8 py-2.5 text-sm border border-gray-200 rounded-xl bg-white shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400 focus:border-transparent transition"
+          />
+          {search && (
+            <button
+              onClick={() => { setSearch(''); fetchPage(1, '') }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {/* Ordering pills */}
+        <div className="flex gap-2 mb-6 overflow-x-auto pb-0.5 scrollbar-none">
+          {[
+            { value: '-vote_count', label: 'Most voted' },
+            { value: 'vote_count',  label: 'Least voted' },
+            { value: '-created_at', label: 'Newest' },
+            { value: 'created_at',  label: 'Oldest' },
+          ].map(({ value, label }) => (
+            <button
+              key={value}
+              onClick={() => handleOrderingChange(value)}
+              className={`shrink-0 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${
+                ordering === value
+                  ? 'bg-indigo-600 border-indigo-600 text-white'
+                  : 'bg-white border-gray-200 text-gray-500 hover:border-indigo-300 hover:text-indigo-600'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
         </div>
 
         {/* Feature list */}
@@ -221,51 +229,51 @@ const FeaturesPage = () => {
                       by <span className="font-medium text-gray-500">{feature.author.username}</span>
                     </p>
                     <div className="flex items-center gap-1.5">
-                    <button
-                      onClick={() => canVote && handleVote(feature)}
-                      disabled={!canVote}
-                      title={
-                        !isAuthenticated ? 'Sign in to vote'
-                        : isOwn ? 'You cannot vote on your own feature'
-                        : feature.user_has_voted ? 'Remove vote'
-                        : 'Upvote'
-                      }
-                      className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-all duration-200 active:scale-95 ${
-                        feature.user_has_voted
-                          ? 'border-yellow-400 bg-yellow-50 text-yellow-600'
-                          : canVote
-                          ? 'border-gray-200 text-gray-400 hover:border-yellow-300 hover:text-yellow-500 hover:bg-yellow-50'
-                          : 'border-gray-100 text-gray-300 cursor-default'
-                      }`}
-                    >
-                      <svg
-                        viewBox="0 0 24 24"
-                        className={`w-3.5 h-3.5 transition-all duration-200 ${
+                      <button
+                        onClick={() => canVote && handleVote(feature)}
+                        disabled={!canVote}
+                        title={
+                          !isAuthenticated ? 'Sign in to vote'
+                          : isOwn ? 'You cannot vote on your own feature'
+                          : feature.user_has_voted ? 'Remove vote'
+                          : 'Upvote'
+                        }
+                        className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium transition-all duration-200 active:scale-95 ${
                           feature.user_has_voted
-                            ? 'fill-yellow-400 stroke-yellow-400'
+                            ? 'border-yellow-400 bg-yellow-50 text-yellow-600'
                             : canVote
-                            ? 'fill-transparent stroke-current group-hover:fill-yellow-300 group-hover:stroke-yellow-400'
-                            : 'fill-transparent stroke-current'
+                            ? 'border-gray-200 text-gray-400 hover:border-yellow-300 hover:text-yellow-500 hover:bg-yellow-50'
+                            : 'border-gray-100 text-gray-300 cursor-default'
                         }`}
-                        strokeWidth={2}
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
                       >
-                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                      </svg>
-                      {feature.vote_count}
-                    </button>
+                        <svg
+                          viewBox="0 0 24 24"
+                          className={`w-3.5 h-3.5 transition-all duration-200 ${
+                            feature.user_has_voted
+                              ? 'fill-yellow-400 stroke-yellow-400'
+                              : canVote
+                              ? 'fill-transparent stroke-current group-hover:fill-yellow-300 group-hover:stroke-yellow-400'
+                              : 'fill-transparent stroke-current'
+                          }`}
+                          strokeWidth={2}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                        </svg>
+                        {feature.vote_count}
+                      </button>
 
-                    <RouterLink
-                      to={`/features/${feature.id}`}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 text-xs font-medium text-gray-400 hover:border-indigo-300 hover:text-indigo-500 hover:bg-indigo-50 transition-all duration-200"
-                      title="View details"
-                    >
-                      <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                        <circle cx="12" cy="12" r="3" />
-                      </svg>
-                    </RouterLink>
+                      <RouterLink
+                        to={`/features/${feature.id}`}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-200 text-xs font-medium text-gray-400 hover:border-indigo-300 hover:text-indigo-500 hover:bg-indigo-50 transition-all duration-200"
+                        title="View details"
+                      >
+                        <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                          <circle cx="12" cy="12" r="3" />
+                        </svg>
+                      </RouterLink>
                     </div>
                   </div>
                 </li>

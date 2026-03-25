@@ -25,6 +25,9 @@ const featuresSlice = createSlice({
       state.features.unshift(action.payload)
       state.count += 1
     },
+    appendFeatures(state, action) {
+      state.features.push(...action.payload)
+    },
     updateFeature(state, action) {
       const index = state.features.findIndex(f => f.id === action.payload.id)
       if (index !== -1) state.features[index] = action.payload
@@ -40,5 +43,5 @@ const featuresSlice = createSlice({
 })
 
 export { PAGE_SIZE }
-export const { setFeatures, setCurrentPage, addFeature, updateFeature, setLoading, setError } = featuresSlice.actions
+export const { setFeatures, setCurrentPage, addFeature, appendFeatures, updateFeature, setLoading, setError } = featuresSlice.actions
 export default featuresSlice.reducer
