@@ -1,5 +1,7 @@
 #!/bin/sh
 
+mkdir -p /data
+
 echo "Running migrations..."
 python manage.py migrate
 

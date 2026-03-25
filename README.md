@@ -4,6 +4,14 @@ A full-stack application where users submit feature requests, vote on them, and 
 
 ---
 
+## Screenshots
+
+![App](images/flow_phase1.png)
+
+![Admin](images/admin.png)
+
+---
+
 ## Stack
 
 | Layer | Technology |
@@ -61,8 +69,9 @@ feature-voting-system/
 │   │   ├── models.py          # User, Feature, Vote
 │   │   ├── serializers.py
 │   │   ├── views.py           # FeatureViewSet, AuthViewSet
+│   │   ├── throttling.py      # VoteRateThrottle, FeatureCreateRateThrottle
 │   │   ├── urls.py
-│   │   └── admin.py
+│   │   └── admin.py           # Jazzmin-styled admin
 │   ├── notifications/
 │   │   ├── models.py          # Notification
 │   │   ├── serializers.py
@@ -92,6 +101,7 @@ feature-voting-system/
     │   │   └── useWebSocket.js   # WS lifecycle, auto-reconnect
     │   ├── components/
     │   │   ├── Navbar.jsx
+    │   │   ├── FeatureCard.jsx
     │   │   ├── NotificationBell.jsx
     │   │   └── ProtectedRoute.jsx
     │   └── pages/
@@ -125,7 +135,8 @@ On first boot `entrypoint.sh` automatically:
 1. Runs `python manage.py migrate`
 2. Creates an admin superuser (`admin` / `admin123`) if it doesn't exist
 3. Runs the seeders to populate sample data
-4. Starts the Daphne ASGI server
+4. Runs `collectstatic` (served by WhiteNoise)
+5. Starts the Daphne ASGI server
 
 ---
 
@@ -198,9 +209,16 @@ Access tokens are short-lived. The Axios interceptor handles silent refresh auto
 - Notifications created automatically when someone votes on your feature (self-votes excluded)
 
 ### Admin
+- Styled with [Jazzmin](https://django-jazzmin.readthedocs.io/) — indigo theme, Font Awesome icons
 - Manage users, features, votes, notifications
 - Bulk actions: mark features as planned / rejected
 - Inline vote count display per feature
+
+### Rate limiting
+- Vote: max 50 votes/hour per user (429 with `Retry-After` header)
+- Feature create: max 10 features/day per user
+- Backed by Redis cache — persists across restarts and multiple workers
+- Frontend shows a dismissable banner with the exact wait time on 429
 
 ---
 

@@ -10,6 +10,7 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+      - sqlite_data:/data
     environment:
       - DJANGO_SETTINGS_MODULE=core.settings
     depends_on:
@@ -24,3 +25,6 @@ services:
       - /app/node_modules
     depends_on:
       - backend
+
+volumes:
+  sqlite_data:
