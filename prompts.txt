@@ -10,3 +10,8 @@
 2026-03-24T00:09:00Z | Set up pytest-django test suite: pytest.ini, tests/conftest.py (fixtures: users, auth clients, features), test_auth.py (7 tests), test_features.py (13 tests), test_votes.py (10 tests). 30/30 passing.
 2026-03-24T00:10:00Z | Created backend/docs/run_tests.md with pytest rationale, run commands, fixture table, test structure, and expected output.
 2026-03-25T00:00:00Z | Created full frontend foundation: api/axios.js (JWT interceptors + refresh), store/index.js, authSlice.js, featuresSlice.js, useAuth.js, useFeatures.js, ProtectedRoute.jsx, LoginPage.jsx, RegisterPage.jsx. Updated App.jsx (BrowserRouter + routes) and main.jsx (Redux Provider).
+2026-03-25T00:01:00Z | Created FeaturesPage.jsx (public list page with vote/unvote, status badges, author); updated App.jsx to route / to FeaturesPage.
+2026-03-25T00:02:00Z | Added header to FeaturesPage with logged-in username, logout button (top right), and Sign in/Register links for unauthenticated users.
+2026-03-25T00:03:00Z | Replaced triangle vote button with Instagram-style SVG heart: filled pink when voted, outline on hover, scale pop on click.
+2026-03-25T00:04:00Z | Replaced heart with star icon in a pill button (bottom right of card); yellow fill when voted, outline on hover, vote count inline.
+2026-03-25T00:05:00Z | Added "+ New Feature" button (top right, authenticated only) that opens a modal with title/description form; dispatches addFeature on success.
