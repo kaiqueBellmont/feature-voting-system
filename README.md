@@ -207,7 +207,11 @@ Access tokens are short-lived. The Axios interceptor handles silent refresh auto
 ## Running tests
 
 ```bash
-docker compose exec backend pytest
+# Backend tests (pytest)
+docker-compose exec backend pytest tests/ -v
+
+# Frontend tests (vitest)
+docker-compose exec frontend npm test
 ```
 
 Tests cover auth (register, login, token refresh), features (CRUD, permissions, pagination, search, ordering), and votes (cast, duplicate, self-vote, remove).
