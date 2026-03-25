@@ -15,3 +15,5 @@
 2026-03-25T00:03:00Z | Replaced triangle vote button with Instagram-style SVG heart: filled pink when voted, outline on hover, scale pop on click.
 2026-03-25T00:04:00Z | Replaced heart with star icon in a pill button (bottom right of card); yellow fill when voted, outline on hover, vote count inline.
 2026-03-25T00:05:00Z | Added "+ New Feature" button (top right, authenticated only) that opens a modal with title/description form; dispatches addFeature on success.
+2026-03-25T00:06:00Z | Fixed N+1 in FeatureViewSet.get_queryset: added select_related('author') and prefetch_related('votes') — now 3 queries total regardless of list size.
+2026-03-25T00:07:00Z | Reminded to log prompts; appended missing last entry to prompts.txt.

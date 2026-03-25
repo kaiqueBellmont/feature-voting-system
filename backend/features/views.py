@@ -14,7 +14,13 @@ class FeatureViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
-        return Feature.objects.annotate(vote_count=Count('votes')).order_by('-vote_count')
+        return (
+            Feature.objects
+            .select_related('author')
+            .prefetch_related('votes')
+            .annotate(vote_count=Count('votes'))
+            .order_by('-vote_count')
+        )
 
     def get_serializer_context(self):
         return {**super().get_serializer_context(), 'request': self.request}
