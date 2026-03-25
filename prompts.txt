@@ -17,3 +17,5 @@
 2026-03-25T00:05:00Z | Added "+ New Feature" button (top right, authenticated only) that opens a modal with title/description form; dispatches addFeature on success.
 2026-03-25T00:06:00Z | Fixed N+1 in FeatureViewSet.get_queryset: added select_related('author') and prefetch_related('votes') — now 3 queries total regardless of list size.
 2026-03-25T00:07:00Z | Reminded to log prompts; appended missing last entry to prompts.txt.
+2026-03-25T00:08:00Z | Added FeaturePagination (page_size=10, max=100) to views.py; updated featuresSlice with count/next/appendFeatures; added Load more button to FeaturesPage; fixed tests for paginated response shape — 32/32 passing.
+2026-03-25T00:09:00Z | Replaced Load more with classic pagination: prev/next arrows, numbered buttons, ellipsis for large page counts, active page highlighted, scrolls to top on page change.

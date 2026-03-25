@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate, Link } from 'react-router-dom'
 import api from '../api/axios'
-import { setFeatures, updateFeature, addFeature } from '../store/slices/featuresSlice'
+import { setFeatures, setCurrentPage, updateFeature, addFeature, PAGE_SIZE } from '../store/slices/featuresSlice'
 import { logout } from '../store/slices/authSlice'
 import useFeatures from '../hooks/useFeatures'
 import useAuth from '../hooks/useAuth'
@@ -20,7 +20,7 @@ const EMPTY_FORM = { title: '', description: '' }
 const FeaturesPage = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const { features, loading, error } = useFeatures()
+  const { features, count, currentPage, loading, error } = useFeatures()
   const { isAuthenticated, user } = useAuth()
 
   const [showModal, setShowModal] = useState(false)
@@ -28,15 +28,23 @@ const FeaturesPage = () => {
   const [formError, setFormError] = useState(null)
   const [submitting, setSubmitting] = useState(false)
 
+  const totalPages = Math.ceil(count / PAGE_SIZE)
+
+  const fetchPage = (page) => {
+    dispatch(setCurrentPage(page))
+    api.get(`features/?page=${page}`).then(({ data }) => dispatch(setFeatures(data)))
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    fetchPage(1)
+  }, [])
+
   const handleLogout = async () => {
     await api.post('auth/logout/').catch(() => {})
     dispatch(logout())
     navigate('/login')
   }
-
-  useEffect(() => {
-    api.get('features/').then(({ data }) => dispatch(setFeatures(data)))
-  }, [dispatch])
 
   const handleVote = async (feature) => {
     try {
@@ -73,6 +81,20 @@ const FeaturesPage = () => {
     setShowModal(false)
     setForm(EMPTY_FORM)
     setFormError(null)
+  }
+
+  // Build page numbers with ellipsis: [1] ... [4] [5] [6] ... [12]
+  const getPageNumbers = () => {
+    if (totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i + 1)
+    const pages = []
+    pages.push(1)
+    if (currentPage > 3) pages.push('...')
+    for (let p = Math.max(2, currentPage - 1); p <= Math.min(totalPages - 1, currentPage + 1); p++) {
+      pages.push(p)
+    }
+    if (currentPage < totalPages - 2) pages.push('...')
+    pages.push(totalPages)
+    return pages
   }
 
   if (loading) {
@@ -129,7 +151,7 @@ const FeaturesPage = () => {
           )}
         </div>
         <p className="text-sm text-gray-500 mb-8">
-          {features.length} {features.length === 1 ? 'request' : 'requests'} · sorted by votes
+          {count} {count === 1 ? 'request' : 'requests'} · sorted by votes
         </p>
 
         {/* Feature list */}
@@ -194,6 +216,45 @@ const FeaturesPage = () => {
               )
             })}
           </ul>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-1 mt-10">
+            <button
+              onClick={() => fetchPage(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-800 disabled:opacity-30 disabled:cursor-default transition-colors"
+            >
+              ←
+            </button>
+
+            {getPageNumbers().map((p, i) =>
+              p === '...' ? (
+                <span key={`ellipsis-${i}`} className="px-2 text-sm text-gray-400">…</span>
+              ) : (
+                <button
+                  key={p}
+                  onClick={() => fetchPage(p)}
+                  className={`w-8 h-8 rounded-lg text-sm font-medium transition-colors ${
+                    p === currentPage
+                      ? 'bg-indigo-600 text-white'
+                      : 'text-gray-500 hover:bg-gray-100'
+                  }`}
+                >
+                  {p}
+                </button>
+              )
+            )}
+
+            <button
+              onClick={() => fetchPage(currentPage + 1)}
+              disabled={currentPage === totalPages}
+              className="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-800 disabled:opacity-30 disabled:cursor-default transition-colors"
+            >
+              →
+            </button>
+          </div>
         )}
       </div>
 
