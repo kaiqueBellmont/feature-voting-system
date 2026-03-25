@@ -9,3 +9,4 @@
 2026-03-24T00:08:00Z | Updated backend/docs/urls.md to reflect JWT auth migration: replaced session auth with simplejwt, added /api/token/ and /api/token/refresh/ endpoints, updated register response, stateless logout, and 2 new business rules (11, 12).
 2026-03-24T00:09:00Z | Set up pytest-django test suite: pytest.ini, tests/conftest.py (fixtures: users, auth clients, features), test_auth.py (7 tests), test_features.py (13 tests), test_votes.py (10 tests). 30/30 passing.
 2026-03-24T00:10:00Z | Created backend/docs/run_tests.md with pytest rationale, run commands, fixture table, test structure, and expected output.
+2026-03-25T00:00:00Z | Created full frontend foundation: api/axios.js (JWT interceptors + refresh), store/index.js, authSlice.js, featuresSlice.js, useAuth.js, useFeatures.js, ProtectedRoute.jsx, LoginPage.jsx, RegisterPage.jsx. Updated App.jsx (BrowserRouter + routes) and main.jsx (Redux Provider).
