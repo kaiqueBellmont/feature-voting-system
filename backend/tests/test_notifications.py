@@ -21,12 +21,12 @@ def notif_url(pk):
 
 
 # ---------------------------------------------------------------------------
-# Shared fixture: silence the Redis channel layer for every test in this file
+# File-local mock that also captures sent messages for assertion
 # ---------------------------------------------------------------------------
 
 @pytest.fixture(autouse=True)
 def mock_channel_layer(monkeypatch):
-    """Replace Redis group_send with a no-op so tests don't need a running Redis."""
+    """Extend the global mock to also capture sent messages for assertion."""
     sent = []
 
     async def fake_group_send(group, message):

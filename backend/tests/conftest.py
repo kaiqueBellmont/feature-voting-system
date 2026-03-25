@@ -1,9 +1,35 @@
 import pytest
+from unittest.mock import MagicMock
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from features.models import Feature, User
 from notifications.models import Notification
+
+
+@pytest.fixture(autouse=True)
+def use_locmem_cache(settings):
+    """Use in-memory cache for all tests and clear it after each test."""
+    settings.CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
+    yield
+    from django.core.cache import cache
+    cache.clear()
+
+
+@pytest.fixture(autouse=True)
+def mock_channel_layer(monkeypatch):
+    """Silence Redis channel layer globally — no Redis required for any test."""
+    async def fake_group_send(group, message):
+        pass
+
+    layer = MagicMock()
+    layer.group_send = fake_group_send
+    monkeypatch.setattr('notifications.signals.get_channel_layer', lambda: layer)
+    return layer
 
 
 @pytest.fixture

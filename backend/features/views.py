@@ -10,6 +10,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import Feature, Vote
 from .serializers import FeatureSerializer, RegisterSerializer, UserSerializer
+from .throttling import FeatureCreateRateThrottle, VoteRateThrottle
 
 
 class FeaturePagination(PageNumberPagination):
@@ -38,6 +39,13 @@ class FeatureViewSet(viewsets.ModelViewSet):
             ))
             .order_by('-vote_count')
         )
+
+    def get_throttles(self):
+        if self.action == 'vote':
+            return [VoteRateThrottle()]
+        if self.action == 'create':
+            return [FeatureCreateRateThrottle()]
+        return super().get_throttles()
 
     def get_serializer_context(self):
         return {**super().get_serializer_context(), 'request': self.request}
