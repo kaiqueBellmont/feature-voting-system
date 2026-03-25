@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -78,6 +79,78 @@ REST_FRAMEWORK = {
     },
 }
 
+JAZZMIN_SETTINGS = {
+    # Browser tab title and top-left logo text
+    'site_title': 'Feature Voting',
+    'site_header': 'Feature Voting',
+    'site_brand': 'Feature Voting',
+    'welcome_sign': 'Welcome to the Feature Voting admin',
+    'copyright': 'Feature Voting System',
+
+    # Top navigation links
+    'topmenu_links': [
+        {'name': 'Home', 'url': 'admin:index'},
+        {'name': 'Features', 'url': 'admin:features_feature_changelist'},
+        {'name': 'Users', 'url': 'admin:features_user_changelist'},
+        {'name': 'View Site', 'url': '/', 'new_window': True},
+    ],
+
+    # Sidebar ordering
+    'order_with_respect_to': ['features', 'notifications'],
+
+    # Icons (Font Awesome 5 classes)
+    'icons': {
+        'features.user':    'fas fa-users',
+        'features.feature': 'fas fa-lightbulb',
+        'features.vote':    'fas fa-star',
+        'notifications.notification': 'fas fa-bell',
+        'auth.Group':       'fas fa-shield-alt',
+    },
+    'default_icon_parents': 'fas fa-folder',
+    'default_icon_children': 'fas fa-circle',
+
+    # Search bar in top nav
+    'search_model': ['features.feature', 'features.user'],
+
+    # UI tweaks
+    'show_sidebar': True,
+    'navigation_expanded': True,
+    'hide_apps': [],
+    'hide_models': [],
+    'related_modal_active': True,
+}
+
+JAZZMIN_UI_TWEAKS = {
+    'navbar_small_text': False,
+    'footer_small_text': False,
+    'body_small_text': False,
+    'brand_small_text': False,
+    'brand_colour': 'navbar-indigo',
+    'accent': 'accent-indigo',
+    'navbar': 'navbar-indigo navbar-dark',
+    'no_navbar_border': True,
+    'navbar_fixed': True,
+    'layout_boxed': False,
+    'footer_fixed': False,
+    'sidebar_fixed': True,
+    'sidebar': 'sidebar-dark-indigo',
+    'sidebar_nav_small_text': False,
+    'sidebar_disable_expand': False,
+    'sidebar_nav_child_indent': True,
+    'sidebar_nav_compact_style': False,
+    'sidebar_nav_legacy_style': False,
+    'sidebar_nav_flat_style': False,
+    'theme': 'default',
+    'button_classes': {
+        'primary':   'btn-primary',
+        'secondary': 'btn-secondary',
+        'info':      'btn-info',
+        'warning':   'btn-warning',
+        'danger':    'btn-danger',
+        'success':   'btn-success',
+    },
+}
+
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
@@ -91,6 +164,7 @@ CACHES = {
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -165,6 +239,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

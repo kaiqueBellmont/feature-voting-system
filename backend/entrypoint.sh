@@ -16,5 +16,8 @@ else:
 echo "Running seeders..."
 python seeders/seed.py
 
+echo "Collecting static files..."
+python manage.py collectstatic --noinput
+
 echo "Starting server..."
 daphne -b 0.0.0.0 -p 8000 core.asgi:application
