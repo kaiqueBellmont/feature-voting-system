@@ -21,7 +21,8 @@ api.interceptors.response.use(
   async (error) => {
     const original = error.config
 
-    if (error.response?.status === 401 && !original._retry) {
+    const isAuthEndpoint = original.url?.includes('/token/')
+    if (error.response?.status === 401 && !original._retry && !isAuthEndpoint) {
       original._retry = true
 
       try {
@@ -33,6 +34,9 @@ api.interceptors.response.use(
         return api(original)
       } catch {
         store.dispatch(logout())
+        // Retry without auth header so public endpoints still succeed
+        delete original.headers.Authorization
+        return api(original)
       }
     }
 

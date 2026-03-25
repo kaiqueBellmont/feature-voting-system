@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useDispatch } from 'react-redux'
-import { useNavigate, Link } from 'react-router-dom'
 import { Link as RouterLink } from 'react-router-dom'
 import api from '../api/axios'
 import { setFeatures, setCurrentPage, updateFeature, addFeature, PAGE_SIZE } from '../store/slices/featuresSlice'
-import { logout } from '../store/slices/authSlice'
 import useFeatures from '../hooks/useFeatures'
 import useAuth from '../hooks/useAuth'
+import Navbar from '../components/Navbar'
 
 const STATUS_COLORS = {
   open: 'bg-green-100 text-green-700',
@@ -20,7 +19,6 @@ const EMPTY_FORM = { title: '', description: '' }
 
 const FeaturesPage = () => {
   const dispatch = useDispatch()
-  const navigate = useNavigate()
   const { features, count, currentPage, loading, error } = useFeatures()
   const { isAuthenticated, user } = useAuth()
 
@@ -59,12 +57,6 @@ const FeaturesPage = () => {
     const value = e.target.value
     setOrdering(value)
     fetchPage(1, search, value)
-  }
-
-  const handleLogout = async () => {
-    await api.post('auth/logout/').catch(() => {})
-    dispatch(logout())
-    navigate('/login')
   }
 
   const handleVote = async (feature) => {
@@ -128,33 +120,7 @@ const FeaturesPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-
-      {/* Header */}
-      <header className="bg-white border-b border-gray-100 shadow-sm">
-        <div className="max-w-2xl mx-auto px-4 h-14 flex items-center justify-between">
-          <span className="font-semibold text-gray-900">Feature Voting</span>
-          <div className="flex items-center gap-3">
-            {isAuthenticated ? (
-              <>
-                <span className="text-sm text-gray-500">
-                  Signed in as <span className="font-medium text-gray-700">{user?.username}</span>
-                </span>
-                <button
-                  onClick={handleLogout}
-                  className="text-sm text-red-500 hover:text-red-700 font-medium transition-colors"
-                >
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link to="/login" className="text-sm text-gray-500 hover:text-gray-700 transition-colors">Sign in</Link>
-                <Link to="/register" className="text-sm bg-indigo-600 text-white px-3 py-1.5 rounded-lg hover:bg-indigo-700 transition-colors">Register</Link>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
+      <Navbar />
 
       <div className="max-w-2xl mx-auto px-4 py-10">
 
