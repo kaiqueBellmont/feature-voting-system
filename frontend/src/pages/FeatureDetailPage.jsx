@@ -56,6 +56,19 @@ const FeatureDetailPage = () => {
 
   const isOwn = user?.id === feature?.author?.id
   const canVote = isAuthenticated && !isOwn
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
+  const handleDelete = async () => {
+    setDeleting(true)
+    try {
+      await api.delete(`features/${feature.id}/`)
+      navigate('/')
+    } catch {
+      setDeleting(false)
+      setConfirmDelete(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -148,8 +161,8 @@ const FeatureDetailPage = () => {
               )}
             </div>
 
-            {/* Vote */}
-            <div className="mt-6">
+            {/* Vote + Delete */}
+            <div className="mt-6 flex items-center justify-between gap-4 flex-wrap">
               <button
                 onClick={() => canVote && handleVote()}
                 disabled={!canVote}
@@ -187,6 +200,37 @@ const FeatureDetailPage = () => {
                 <p className="mt-2 text-xs text-gray-400">
                   <Link to="/login" className="text-indigo-500 hover:underline">Sign in</Link> to vote on this feature.
                 </p>
+              )}
+
+              {isOwn && (
+                <div className="flex items-center gap-2">
+                  {confirmDelete ? (
+                    <>
+                      <span className="text-xs text-gray-500">Delete this feature?</span>
+                      <button
+                        onClick={handleDelete}
+                        disabled={deleting}
+                        className="text-xs font-medium px-3 py-1.5 rounded-full bg-red-500 text-white hover:bg-red-600 disabled:opacity-50 transition-colors"
+                      >
+                        {deleting ? 'Deleting…' : 'Confirm'}
+                      </button>
+                      <button
+                        onClick={() => setConfirmDelete(false)}
+                        disabled={deleting}
+                        className="text-xs font-medium px-3 py-1.5 rounded-full border border-gray-200 text-gray-500 hover:border-gray-300 hover:text-gray-700 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmDelete(true)}
+                      className="text-xs font-medium px-3 py-1.5 rounded-full border border-red-200 text-red-400 hover:border-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      Delete
+                    </button>
+                  )}
+                </div>
               )}
             </div>
 

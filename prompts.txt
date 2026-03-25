@@ -26,3 +26,4 @@
 2026-03-25T00:14:00Z | Added eye icon button beside vote button in feature list cards, navigates to detail page.
 2026-03-25T00:15:00Z | Wrapped vote and eye buttons in a flex gap-1.5 container so they sit together in the bottom right corner.
 2026-03-25T00:16:00Z | Added rank field to FeatureSerializer and Window(Rank()) annotation in get_queryset; showed rank badge (gold/silver/bronze for top 3) in list cards and detail page — 32/32 passing.
+2026-03-25T00:17:00Z | Added delete button to FeatureDetailPage (visible to feature author only): inline confirmation dialog with Confirm/Cancel; on confirm calls DELETE /features/:id/ and navigates to /.
