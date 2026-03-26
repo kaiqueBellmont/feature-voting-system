@@ -9,3 +9,7 @@ dist/
 .DS_Store
 .idea
 
+backend/.idea
+backend/__pycache__/
+backend/*.pyc
+frontend/node_modules/
