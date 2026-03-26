@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate, Link } from 'react-router-dom'
 import api from '../api/axios'
-import { setCredentials } from '../store/slices/authSlice'
+import { setCredentials, logout } from '../store/slices/authSlice'
 
 const RegisterPage = () => {
   const dispatch = useDispatch()
@@ -20,6 +20,7 @@ const RegisterPage = () => {
     e.preventDefault()
     setError(null)
     setLoading(true)
+    dispatch(logout()) // clear any previous session before setting new credentials
 
     try {
       const { data } = await api.post('auth/register/', form)

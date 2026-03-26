@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { useNavigate, Link } from 'react-router-dom'
 import api from '../api/axios'
-import { setCredentials } from '../store/slices/authSlice'
+import { setCredentials, logout } from '../store/slices/authSlice'
 
 const LoginPage = () => {
   const dispatch = useDispatch()
@@ -20,6 +20,7 @@ const LoginPage = () => {
     e.preventDefault()
     setError(null)
     setLoading(true)
+    dispatch(logout()) // clear any previous session so the interceptor doesn't reuse the old token
 
     try {
       const { data } = await api.post('token/', form)

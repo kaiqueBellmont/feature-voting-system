@@ -129,6 +129,9 @@ docker compose up --build
 | Frontend | http://localhost:5173 |
 | Backend API | http://localhost:8000/api/ |
 | Django Admin | http://localhost:8000/admin/ |
+| Swagger UI | http://localhost:8000/api/docs/ |
+| ReDoc | http://localhost:8000/api/redoc/ |
+| OpenAPI schema | http://localhost:8000/api/schema/ |
 | WebSocket | ws://localhost:8000/ws/notifications/?token=\<access\> |
 
 On first boot `entrypoint.sh` automatically:
@@ -226,10 +229,10 @@ Access tokens are short-lived. The Axios interceptor handles silent refresh auto
 
 ```bash
 # Backend tests (pytest)
-docker-compose exec backend pytest tests/ -v
+docker compose exec backend pytest tests/ -v
 
 # Frontend tests (vitest)
-docker-compose exec frontend npm test
+docker compose exec frontend npm test
 ```
 
 Tests cover auth (register, login, token refresh), features (CRUD, permissions, pagination, search, ordering), and votes (cast, duplicate, self-vote, remove).
@@ -239,3 +242,22 @@ Tests cover auth (register, login, token refresh), features (CRUD, permissions, 
 ## API reference
 
 See [`backend/docs/urls.md`](backend/docs/urls.md) for the full endpoint reference including request/response shapes, status codes, and business rules.
+
+---
+
+## API documentation (Swagger)
+
+The API is fully documented with **OpenAPI 3** via [drf-spectacular](https://drf-spectacular.readthedocs.io/).
+
+| UI | URL | Description |
+|---|---|---|
+| Swagger UI | http://localhost:8000/api/docs/ | Interactive — try every endpoint in the browser |
+| ReDoc | http://localhost:8000/api/redoc/ | Clean reading view |
+| Raw schema | http://localhost:8000/api/schema/ | OpenAPI 3 YAML — import into Postman or Insomnia |
+
+### Authenticating in Swagger UI
+
+1. Call `POST /api/token/` with your credentials to get an `access` token
+2. Click the **Authorize** button (top right)
+3. Enter `Bearer <access_token>`
+4. All subsequent requests in the UI will include the token automatically

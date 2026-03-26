@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'jazzmin',
     'django.contrib.admin',
+    'drf_spectacular',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -67,16 +68,30 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],
-    'DEFAULT_THROTTLE_CLASSES': [
-        'rest_framework.throttling.AnonRateThrottle',
-        'rest_framework.throttling.UserRateThrottle',
-    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '100/day',
-        'user': '1000/day',
         'vote': '50/hour',
         'feature_create': '10/day',
     },
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Feature Voting API',
+    'DESCRIPTION': (
+        'REST API for the Feature Voting System.\n\n'
+        'Authentication uses **JWT** (Bearer token). Obtain a token pair via '
+        '`POST /api/token/` and pass the access token as '
+        '`Authorization: Bearer <token>` on protected endpoints.'
+    ),
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'TAGS': [
+        {'name': 'auth',          'description': 'Registration, login and current user'},
+        {'name': 'features',      'description': 'Feature request CRUD and voting'},
+        {'name': 'notifications', 'description': 'In-app notifications (REST)'},
+        {'name': 'token',         'description': 'JWT token management'},
+    ],
 }
 
 JAZZMIN_SETTINGS = {

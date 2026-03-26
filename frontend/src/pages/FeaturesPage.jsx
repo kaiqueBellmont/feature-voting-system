@@ -33,9 +33,11 @@ const FeaturesPage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
+  // Re-fetch whenever the logged-in user changes so user_has_voted is correct for the new user
   useEffect(() => {
     fetchPage(1)
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id])
 
   const handleSearchChange = (e) => {
     const value = e.target.value
@@ -66,6 +68,9 @@ const FeaturesPage = () => {
         const seconds = retryAfter ? parseInt(retryAfter, 10) : 3600
         const wait = seconds < 60 ? `${seconds}s` : seconds < 3600 ? `${Math.ceil(seconds / 60)} minutes` : `${Math.ceil(seconds / 3600)} hours`
         setVoteError(`Vote limit reached. Try again in ${wait}.`)
+        setTimeout(() => setVoteError(null), 5000)
+      } else if (err.response?.status === 400) {
+        setVoteError(err.response.data?.detail ?? 'Could not register vote.')
         setTimeout(() => setVoteError(null), 5000)
       }
     }

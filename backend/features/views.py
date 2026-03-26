@@ -1,5 +1,6 @@
 from django.db.models import Count, F, Window
 from django.db.models.functions import Rank
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter, SearchFilter
@@ -19,6 +20,48 @@ class FeaturePagination(PageNumberPagination):
     max_page_size = 100
 
 
+@extend_schema_view(
+    list=extend_schema(
+        tags=['features'],
+        summary='List feature requests',
+        description=(
+            'Returns a paginated list of all feature requests ordered by vote count (highest first). '
+            'Supports full-text search on title and description, ordering and pagination. '
+            'Public endpoint — no authentication required.'
+        ),
+        parameters=[
+            OpenApiParameter('search', str, description='Search in title and description'),
+            OpenApiParameter('ordering', str, description='Sort by: `vote_count`, `-vote_count`, `created_at`, `-created_at`'),
+            OpenApiParameter('page', int, description='Page number'),
+            OpenApiParameter('page_size', int, description='Results per page (max 100)'),
+        ],
+    ),
+    create=extend_schema(
+        tags=['features'],
+        summary='Create a feature request',
+        description='Creates a new feature request. The authenticated user becomes the author. Max 10 per day.',
+    ),
+    retrieve=extend_schema(
+        tags=['features'],
+        summary='Retrieve a feature request',
+        description='Returns a single feature request by ID, including vote count and rank.',
+    ),
+    update=extend_schema(
+        tags=['features'],
+        summary='Replace a feature request',
+        description='Full update. Only the feature author can update.',
+    ),
+    partial_update=extend_schema(
+        tags=['features'],
+        summary='Partially update a feature request',
+        description='Partial update. Only the feature author can update.',
+    ),
+    destroy=extend_schema(
+        tags=['features'],
+        summary='Delete a feature request',
+        description='Deletes the feature request and all associated votes. Only the feature author can delete.',
+    ),
+)
 class FeatureViewSet(viewsets.ModelViewSet):
     serializer_class = FeatureSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
@@ -53,6 +96,19 @@ class FeatureViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
+    @extend_schema(
+        tags=['features'],
+        summary='Vote on a feature',
+        description=(
+            'Casts a vote for the feature. Authors cannot vote on their own features. '
+            'Each user can vote once per feature. Rate limited to **50 votes/hour**.'
+        ),
+        responses={
+            201: OpenApiResponse(description='Vote registered'),
+            400: OpenApiResponse(description='Already voted or own feature'),
+            429: OpenApiResponse(description='Vote rate limit exceeded'),
+        },
+    )
     @action(detail=True, methods=['post'], permission_classes=[IsAuthenticated])
     def vote(self, request, pk=None):
         feature = self.get_object()
@@ -63,6 +119,15 @@ class FeatureViewSet(viewsets.ModelViewSet):
             return Response({'detail': 'Already voted.'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_201_CREATED)
 
+    @extend_schema(
+        tags=['features'],
+        summary='Remove a vote from a feature',
+        description='Removes a previously cast vote. Returns 404 if the user has not voted on this feature.',
+        responses={
+            204: OpenApiResponse(description='Vote removed'),
+            404: OpenApiResponse(description='Vote not found'),
+        },
+    )
     @vote.mapping.delete
     def unvote(self, request, pk=None):
         feature = self.get_object()
@@ -73,13 +138,23 @@ class FeatureViewSet(viewsets.ModelViewSet):
 
 
 class AuthViewSet(viewsets.ViewSet):
+    serializer_class = UserSerializer
 
+    @extend_schema(
+        tags=['auth'],
+        summary='Register a new user',
+        description='Creates a new user account and returns a JWT token pair immediately — no separate login needed.',
+        request=RegisterSerializer,
+        responses={
+            201: OpenApiResponse(description='User created. Returns `user`, `access` and `refresh` tokens.'),
+            400: OpenApiResponse(description='Validation error (e.g. username already taken)'),
+        },
+    )
     @action(detail=False, methods=['post'])
     def register(self, request):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        # gera tokens JWT automaticamente após registro
         refresh = RefreshToken.for_user(user)
         return Response({
             'user': UserSerializer(user).data,
@@ -87,12 +162,28 @@ class AuthViewSet(viewsets.ViewSet):
             'refresh': str(refresh),
         }, status=status.HTTP_201_CREATED)
 
+    @extend_schema(
+        tags=['auth'],
+        summary='Logout',
+        description=(
+            'Stateless logout — JWT is discarded on the client side. '
+            'This endpoint exists as a hook for optional server-side token blacklisting.'
+        ),
+        responses={200: OpenApiResponse(description='Logged out')},
+    )
     @action(detail=False, methods=['post'])
     def logout(self, request):
-        # com JWT o logout é stateless — frontend deleta o token
-        # opcionalmente blacklista o refresh token
         return Response(status=status.HTTP_200_OK)
 
+    @extend_schema(
+        tags=['auth'],
+        summary='Current user',
+        description='Returns the profile of the currently authenticated user.',
+        responses={
+            200: UserSerializer,
+            401: OpenApiResponse(description='Not authenticated'),
+        },
+    )
     @action(detail=False, methods=['get'])
     def me(self, request):
         if not request.user.is_authenticated:

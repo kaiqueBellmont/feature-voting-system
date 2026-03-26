@@ -49,6 +49,9 @@ const FeatureDetailPage = () => {
         const wait = seconds < 60 ? `${seconds}s` : seconds < 3600 ? `${Math.ceil(seconds / 60)} minutes` : `${Math.ceil(seconds / 3600)} hours`
         setVoteError(`Vote limit reached. Try again in ${wait}.`)
         setTimeout(() => setVoteError(null), 5000)
+      } else if (err.response?.status === 400) {
+        setVoteError(err.response.data?.detail ?? 'Could not register vote.')
+        setTimeout(() => setVoteError(null), 5000)
       }
     }
   }

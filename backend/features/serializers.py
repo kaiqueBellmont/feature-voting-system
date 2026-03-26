@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 
 from .models import Feature, User, Vote
@@ -34,6 +35,7 @@ class FeatureSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at'
         ]
 
+    @extend_schema_field(serializers.BooleanField())
     def get_user_has_voted(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:

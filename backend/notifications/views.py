@@ -1,3 +1,4 @@
+from drf_spectacular.utils import OpenApiParameter, OpenApiResponse, extend_schema, extend_schema_view
 from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
@@ -14,6 +15,30 @@ class NotificationPagination(PageNumberPagination):
     max_page_size = 100
 
 
+@extend_schema_view(
+    list=extend_schema(
+        tags=['notifications'],
+        summary='List notifications',
+        description=(
+            'Returns the authenticated user\'s notifications, newest first. '
+            'Includes the `X-Unread-Count` response header with the total number of unread notifications. '
+            'Use `?unread=true` to return only unread items.'
+        ),
+        parameters=[
+            OpenApiParameter('unread', bool, description='When `true`, returns only unread notifications'),
+            OpenApiParameter('page', int, description='Page number'),
+        ],
+    ),
+    partial_update=extend_schema(
+        tags=['notifications'],
+        summary='Mark a notification as read or unread',
+        description='Updates the `is_read` field of a notification. Only the recipient can update their own notifications.',
+        responses={
+            200: NotificationSerializer,
+            404: OpenApiResponse(description='Notification not found or belongs to another user'),
+        },
+    ),
+)
 class NotificationViewSet(
     mixins.ListModelMixin,
     mixins.UpdateModelMixin,
@@ -23,6 +48,7 @@ class NotificationViewSet(
     permission_classes = [IsAuthenticated]
     pagination_class = NotificationPagination
     http_method_names = ['get', 'patch', 'post', 'head', 'options']
+    lookup_value_regex = r'[0-9]+'
 
     def get_queryset(self):
         qs = (
@@ -56,6 +82,12 @@ class NotificationViewSet(
         serializer.save()
         return Response(serializer.data)
 
+    @extend_schema(
+        tags=['notifications'],
+        summary='Unread notification count',
+        description='Returns the number of unread notifications for the authenticated user.',
+        responses={200: OpenApiResponse(description='`{ "count": <int> }`')},
+    )
     @action(detail=False, methods=['get'], url_path='unread_count')
     def unread_count(self, request):
         count = (
@@ -65,6 +97,12 @@ class NotificationViewSet(
         )
         return Response({'count': count})
 
+    @extend_schema(
+        tags=['notifications'],
+        summary='Mark all notifications as read',
+        description='Sets `is_read = true` on every unread notification belonging to the authenticated user.',
+        responses={200: OpenApiResponse(description='All notifications marked as read')},
+    )
     @action(detail=False, methods=['post'], url_path='mark_all_read')
     def mark_all_read(self, request):
         Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
